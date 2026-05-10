@@ -1,24 +1,26 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 
 const app = express();
-const port = 4000; // Îl punem pe portul 4000 ca să nu se bată cu IO MS
+const port = 4000;
+const SECRET_KEY = "glowup_super_secret_key_2026"; // in productie asta o vom muta in variabile de mediu
 
 app.use(express.json());
 
-// Endpoint pentru verificarea stării
 app.get('/health', (req, res) => {
   res.json({ status: "Auth Service is running and ready!" });
 });
 
-// Endpoint pentru înregistrare
 app.post('/register', (req, res) => {
   const { username, password } = req.body;
-  
   if (username && password) {
-    // Aici, în Etapa 3, vom adăuga salvarea în Auth DB
+    // Generăm un token real valabil 24 de ore
+    const token = jwt.sign({ username: username }, SECRET_KEY, { expiresIn: '24h' });
+
     res.json({ 
-        message: "Înregistrare reușită (Mock)!", 
-        user: username 
+        message: "Autentificare securizată reușită!", 
+        user: username,
+        token: token
     });
   } else {
     res.status(400).json({ error: "Te rog furnizează username și parolă." });
