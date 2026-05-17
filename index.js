@@ -11,20 +11,29 @@ app.get('/health', (req, res) => {
   res.json({ status: "Auth Service is running and ready!" });
 });
 
-app.post('/register', (req, res) => {
-  const { username, password } = req.body;
-  if (username && password) {
-    // Generăm un token real valabil 24 de ore
-    const token = jwt.sign({ username: username }, SECRET_KEY, { expiresIn: '24h' });
+app.post('/auth/register', (req, res) => {
+    // Acum preluam si datele despre ten
+    const { username, password, skin_type, sensitivities } = req.body;
+
+    if (!username || !password) {
+        return res.status(400).json({ error: "Username și parola sunt obligatorii!" });
+    }
+
+    // Aici in viitor am verifica parola in DB, dar pt Auth MS generam token-ul
+    const userPayload = { 
+        username: username, 
+        skin_type: skin_type || "mixt", // default daca nu introduce
+        sensitivities: sensitivities || "niciuna"
+    };
+
+    // Generam token-ul care acum contine si tipul de ten
+    const token = jwt.sign(userPayload, "CHEIA_SECRETA_GLOWUP", { expiresIn: '24h' });
 
     res.json({ 
-        message: "Autentificare securizată reușită!", 
-        user: username,
-        token: token
+        message: "Autentificare securizată reușită! Profilul a fost creat.", 
+        token: token,
+        profile: userPayload
     });
-  } else {
-    res.status(400).json({ error: "Te rog furnizează username și parolă." });
-  }
 });
 
 app.listen(port, () => {
